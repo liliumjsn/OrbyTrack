@@ -503,7 +503,7 @@ namespace UiStateSettings
                     Settings::set_contrast_level((uint8_t) item->val);
                     _display.setContrast(Settings::get_contrast_level());
                 },
-			.name = "SCREEN_DIM"
+			.name = "SCREEN_CONT"
 		},
 		{
 			.offset = 1.0f,
