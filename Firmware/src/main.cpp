@@ -13,7 +13,11 @@ void setup()
     Serial.println(" by LiliumJSN");
     Settings::init();
     PowerManager::init();
-    // DropletDetector::init();
+    DropletDetector::init();
+    DropletDetector::set_detection_cb([](DropletDetector::DetectedDroplet *latest_detected_droplet){
+        PowerManager::reset_sleep_timer();
+        Serial.println("DP");
+    });
     Ui::init();
 }
 
@@ -21,4 +25,9 @@ void loop()
 {
 	PowerManager::handle();
     Ui::handle();
+    if(PowerManager::is_time_to_sleep())
+    {
+        Ui::change_state(Ui::UiStateSleep::get_data());
+    }
+    DropletDetector::handle();
 }
