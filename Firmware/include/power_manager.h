@@ -22,6 +22,10 @@ uint8_t get_batt_perc();
 void attach_wakeup_cb();
 bool is_charging();
 void sleep();
+void reset_sleep_timer();
+bool is_time_to_sleep();
+uint32_t get_sec_until_sleep();
+float get_chg_volt();
 
 }
 

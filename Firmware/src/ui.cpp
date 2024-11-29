@@ -21,6 +21,69 @@ UiStateData* _cur_state = NULL;
 UiStateData* _next_state = NULL;
 Adafruit_SH1107 _display = Adafruit_SH1107(SCREEN_HEIGHT, SCREEN_WIDTH, &Wire);
 
+void (*btn_up_click_state_cb)() = NULL;
+void (*btn_dn_click_state_cb)() = NULL;
+void (*btn_ok_click_state_cb)() = NULL;
+void (*btn_ok_lpress_state_cb)() = NULL;
+
+struct BlinkItem
+{
+    uint16_t half_period_ms = 0;
+    uint32_t last_change_ts = 0;
+    void (*process_on_period)(const char* txt);
+    void (*process_off_period)(const char* txt);
+    bool is_off_period = false;
+};
+
+void btn_up_click(void* btn)
+{
+    PowerManager::reset_sleep_timer();
+    if(btn_up_click_state_cb != NULL) btn_up_click_state_cb();
+}
+
+void btn_dn_click(void* btn)
+{
+    PowerManager::reset_sleep_timer();
+    if(btn_dn_click_state_cb != NULL) btn_dn_click_state_cb();
+}
+
+void btn_ok_click(void* btn)
+{
+    PowerManager::reset_sleep_timer();
+    if(btn_ok_click_state_cb != NULL) btn_ok_click_state_cb();
+}
+
+void btn_ok_lpress(void* btn)
+{
+    PowerManager::reset_sleep_timer();
+    if(btn_ok_lpress_state_cb != NULL) btn_ok_lpress_state_cb();
+}
+
+void process_blink_item(BlinkItem* item, bool blink, const char* txt, bool* update_scr)
+{
+    if(!blink)
+    {
+        item->process_on_period(txt);
+        return;
+    }
+
+    if(millis() - item->last_change_ts > item->half_period_ms)
+    {
+        item->is_off_period = !item->is_off_period;
+        item->last_change_ts = millis();
+    }
+
+    if(item->is_off_period)
+    {
+        item->process_off_period(txt);
+    }
+    else
+    {
+        item->process_on_period(txt);
+    }
+    
+}
+
 void show_logo()
 {
 	_display.clearDisplay();
@@ -34,10 +97,10 @@ void show_logo()
 
 void detach_all_btn()
 {
-	_btn_up.attachClick([](void* btn){}, &_btn_up);
-	_btn_dn.attachClick([](void* btn){}, &_btn_dn);
-	_btn_ok.attachClick([](void* btn){}, &_btn_ok);
-	_btn_ok.attachLongPressStart([](void* btn){}, &_btn_ok);
+    btn_up_click_state_cb = NULL;
+    btn_dn_click_state_cb = NULL;
+    btn_ok_click_state_cb = NULL;
+    btn_ok_lpress_state_cb = NULL;
 }
 
 void flush_display()
@@ -83,6 +146,7 @@ namespace UiStateWokeup
 	void on_enter()
 	{
 		_data.entered_ts = millis();
+        _display.setContrast(Settings::get_contrast_level());
 		detach_all_btn();
 		show_logo();
 	}	
@@ -164,20 +228,34 @@ namespace UiStateMain
 	void draw()
 	{
 		_display.clearDisplay();
-		_display.setContrast(5);
 
 		draw_measuring_selector(_measuring_type);
 		draw_battery_icon(90, 0, (uint8_t) PowerManager::get_batt_perc(), PowerManager::is_charging());
 		
 		_display.setCursor(0,17);
-		_display.setTextSize(4);    
+		_display.setTextSize(4);
+        switch(_measuring_type)
+        {
+            case Settings::MeasuringType::GTT:
+                _drip_rate = DropletDetector::get_drops_per_min();
+                break;
+            case Settings::MeasuringType::MACRO:
+                _drip_rate = DropletDetector::get_ml_per_min();
+                break;
+            case Settings::MeasuringType::MICRO:
+                _drip_rate = DropletDetector::get_ml_per_min(true);
+                break;
+            default:
+                break;
+        }
+
 		if(_drip_rate == INFINITY)
 		{
 			_display.print(0.0f, 1);
 		}
 		else
 		{
-			_display.print(122.0, 1);
+			_display.print(_drip_rate, 1);
 		}	
 
 		_display.setTextSize(1);	
@@ -194,7 +272,7 @@ namespace UiStateMain
 		_display.display();
 	}
 
-	void btn_up_click(void* btn)
+	void btn_up_click()
 	{
 		if(_measuring_type == Settings::MeasuringType::MACRO) _measuring_type = Settings::MeasuringType::MICRO;
 		else if(_measuring_type == Settings::MeasuringType::MICRO) _measuring_type = Settings::MeasuringType::GTT;
@@ -205,17 +283,17 @@ namespace UiStateMain
 		Settings::save();
 	}
 
-	void btn_ok_click(void* btn)
+	void btn_ok_click()
 	{
 		change_state(UiStateSettings::get_data());
 	}
 
-	void btn_ok_long_press(void* btn)
+	void btn_ok_long_press()
 	{
 		change_state(UiStateSleep::get_data());
 	}
 
-	void btn_dn_click(void* btn)
+	void btn_dn_click()
 	{
 		change_state(UiStateInfo::get_data());
 	}
@@ -223,11 +301,12 @@ namespace UiStateMain
 	void on_enter()
 	{
 		_data.entered_ts = millis();
-		_btn_up.attachClick(btn_up_click, &_btn_up);
-		_btn_dn.attachClick(btn_dn_click, &_btn_dn);
-		_btn_ok.attachClick(btn_ok_click, &_btn_ok);
-		_btn_ok.attachLongPressStart(btn_ok_long_press, &_btn_ok);
+        btn_up_click_state_cb = btn_up_click;
+        btn_dn_click_state_cb = btn_dn_click;
+        btn_ok_click_state_cb = btn_ok_click;
+        btn_ok_lpress_state_cb = btn_ok_long_press;
 		_measuring_type = Settings::get_measuring_type();
+        DropletDetector::enable();
 		draw();
 	}	
 
@@ -250,6 +329,7 @@ namespace UiStateMain
 
 	void on_exit()
 	{
+        DropletDetector::disable();
 		flush_display();
 	}
 
@@ -277,7 +357,11 @@ namespace UiStateInfo
 		_display.print("BAT_V:");
 		_display.print(PowerManager::get_batt_volt(), 3);
 
-		_display.setCursor(0, 22);
+        _display.setCursor(0, 22);
+		_display.print("CHG_V:");
+		_display.print(PowerManager::get_chg_volt(), 3);
+
+		_display.setCursor(0, 32);
 		_display.print("POW_STATE:");
 		switch(PowerManager::get_power_state())
 		{
@@ -293,11 +377,12 @@ namespace UiStateInfo
 			default:
 				break;
 		}
-		_display.setCursor(0, 32);
-		_display.print("TS:");
-		_display.print(millis()/1000);
-
 		_display.setCursor(0, 42);
+		_display.print("SLEEP_IN:");
+		_display.print(PowerManager::get_sec_until_sleep());
+        _display.print("s");
+
+		_display.setCursor(0, 52);
 		_display.print("FW_VER:");
 		_display.print(ORBYTRACK_APP_VERSION);
 
@@ -305,12 +390,12 @@ namespace UiStateInfo
 		_display.display();
 	}
 
-	void btn_ok_long_press(void* btn)
+	void btn_ok_long_press()
 	{
 		change_state(UiStateSleep::get_data());
 	}
 
-	void btn_click(void* btn)
+	void btn_click()
 	{
 		change_state(UiStateMain::get_data());
 	}
@@ -318,10 +403,10 @@ namespace UiStateInfo
 	void on_enter()
 	{
 		_data.entered_ts = millis();
-		_btn_up.attachClick(btn_click, &_btn_up);
-		_btn_dn.attachClick(btn_click, &_btn_dn);
-		_btn_ok.attachClick(btn_click, &_btn_ok);
-		_btn_ok.attachLongPressStart(btn_ok_long_press, &_btn_ok);
+        btn_up_click_state_cb = btn_click;
+        btn_dn_click_state_cb = btn_click;
+        btn_ok_click_state_cb = btn_click;
+        btn_ok_lpress_state_cb = btn_ok_long_press;
 		draw();
 	}
 
@@ -354,6 +439,20 @@ namespace UiStateSettings
 	uint8_t _page_index = 0;
 	bool _item_selected = false;
 
+    BlinkItem setting_title = 
+    {
+        .half_period_ms = 300,
+        .last_change_ts = millis(),
+        .process_on_period = [](const char* txt){
+            _display.setTextColor(SH110X_WHITE);
+            _display.print(txt);
+        },
+        .process_off_period = [](const char* txt){
+            _display.setTextColor(SH110X_BLACK);
+            _display.print(txt);
+        }
+    };
+
 	struct SettingsItem
 	{
 		uint8_t index = 0;
@@ -374,12 +473,12 @@ namespace UiStateSettings
 		{
 			.offset = 1.0f,
 			.min = 5.0f,
-			.max = 20.0f,
+			.max = 40.0f,
 			.val = (float) Settings::default_settings.shutdown_inactivity_minutes,
 			.decimals = 0,
 			.on_load = [](SettingsItem* item){item->val = Settings::get_shutdown_inactivity_minutes();},
 			.on_save = [](SettingsItem* item){Settings::set_shutdown_inactivity_minutes((uint16_t) item->val);},
-			.name = "T_OFF",
+			.name = "TIME_OFF",
 			.units = "mins"
 		},
 		{
@@ -390,7 +489,7 @@ namespace UiStateSettings
 			.decimals = 2,
 			.on_load = [](SettingsItem* item){item->val = Settings::get_batt_cutoff();},
 			.on_save = [](SettingsItem* item){Settings::set_batt_cutoff( item->val);},
-			.name = "BATT_OFF",
+			.name = "BATT_V_OFF",
 			.units = "V"
 		},
 		{
@@ -400,8 +499,11 @@ namespace UiStateSettings
 			.val = (float) Settings::default_settings.contrast_level,
 			.decimals = 0,
 			.on_load = [](SettingsItem* item){item->val = Settings::get_contrast_level();},
-			.on_save = [](SettingsItem* item){Settings::set_contrast_level((uint8_t) item->val);},
-			.name = "CNTR"
+			.on_save = [](SettingsItem* item){
+                    Settings::set_contrast_level((uint8_t) item->val);
+                    _display.setContrast(Settings::get_contrast_level());
+                },
+			.name = "SCREEN_DIM"
 		},
 		{
 			.offset = 1.0f,
@@ -411,7 +513,7 @@ namespace UiStateSettings
 			.decimals = 0,
 			.on_load = [](SettingsItem* item){item->val = Settings::get_droplet_threshold_level();},
 			.on_save = [](SettingsItem* item){Settings::set_droplet_threshold_level((uint16_t) item->val);},
-			.name = "D_THLD"
+			.name = "DROP_THLD"
 		},
 		{
 			.offset = 5.0f,
@@ -421,7 +523,7 @@ namespace UiStateSettings
 			.decimals = 0,
 			.on_load = [](SettingsItem* item){item->val = Settings::get_droplet_influence_level();},
 			.on_save = [](SettingsItem* item){Settings::set_droplet_influence_level((uint16_t) item->val);},
-			.name = "D_INFL"
+			.name = "DROP_INFL"
 		}
 	};
 
@@ -449,23 +551,23 @@ namespace UiStateSettings
 		for(int i = 0; i < 5; i++)
 		{
 			_display.setCursor(6, (i+1) * 10 + 2);
-			_display.print(items[i].name);
-			_display.print(":");
-			if(_item_selected && _selector_index == i) _display.print("[");
+            bool blink = _item_selected && _selector_index == i;
+            process_blink_item(&setting_title, blink, items[i].name, &_update_screen);
+            _display.setTextColor(SH110X_WHITE);
+            _display.print(":");
 			_display.print(items[i].val, items[i].decimals);
-			_display.print(items[i].units);
-			if(_item_selected && _selector_index == i) _display.print("]");			
+			_display.print(items[i].units);	
 		}
 
 		_display.display();
 	}
 
-	void btn_ok_long_press(void* btn)
+	void btn_ok_long_press()
 	{
 		change_state(UiStateMain::get_data());
 	}
 
-	void btn_up_click(void* btn)
+	void btn_up_click()
 	{
 		if(!_item_selected)
 		{
@@ -475,11 +577,15 @@ namespace UiStateSettings
 		else
 		{
 			items[_selector_index].val += items[_selector_index].offset;
+            if(items[_selector_index].val > items[_selector_index].max)
+            {
+                items[_selector_index].val = items[_selector_index].max;
+            }
 		}
 		_update_screen = true;
 	}
 
-	void btn_dn_click(void* btn)
+	void btn_dn_click()
 	{
 		if(!_item_selected)
 		{
@@ -489,11 +595,15 @@ namespace UiStateSettings
 		else
 		{
 			items[_selector_index].val -= items[_selector_index].offset;
+            if(items[_selector_index].val < items[_selector_index].min)
+            {
+                items[_selector_index].val = items[_selector_index].min;
+            }
 		}
 		_update_screen = true;
 	}
 
-	void btn_ok_click(void* btn)
+	void btn_ok_click()
 	{
 		if(!_item_selected)
 		{
@@ -511,10 +621,10 @@ namespace UiStateSettings
 	void on_enter()
 	{
 		_data.entered_ts = millis();
-		_btn_up.attachClick(btn_up_click, &_btn_up);
-		_btn_dn.attachClick(btn_dn_click, &_btn_dn);
-		_btn_ok.attachClick(btn_ok_click, &_btn_ok);
-		_btn_ok.attachLongPressStart(btn_ok_long_press, &_btn_ok);
+        btn_up_click_state_cb = btn_up_click;
+        btn_dn_click_state_cb = btn_dn_click;
+        btn_ok_click_state_cb = btn_ok_click;
+        btn_ok_lpress_state_cb = btn_ok_long_press;
 		for(int i = 0; i < 5; i++)
 		{
 			items[i].on_load(&items[i]);
@@ -532,7 +642,7 @@ namespace UiStateSettings
 		}
 		interrupts();
 
-		if(millis() - _last_draw_ts > DISPLAY_REF_PERIOD_MS)
+		if(millis() - _last_draw_ts > 300)
 		{
 			draw();
 			_last_draw_ts = millis();
@@ -590,9 +700,13 @@ void init()
 	_display.begin(DISPLAY_I2C_ADDR, true);
     _display.setRotation(3);
     _display.setTextColor(SH110X_WHITE);
-	_display.setContrast(5);
+	_display.setContrast(Settings::get_contrast_level());
 	_display.clearDisplay();
 	_display.display();
+    _btn_up.attachClick(btn_up_click, &_btn_up);
+	_btn_dn.attachClick(btn_dn_click, &_btn_dn);
+	_btn_ok.attachClick(btn_ok_click, &_btn_ok);
+	_btn_ok.attachLongPressStart(btn_ok_lpress, &_btn_ok);
 	change_state(UiStateBoot::get_data());
 }
 

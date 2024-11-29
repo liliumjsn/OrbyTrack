@@ -1,3 +1,26 @@
 {
-	"folders": []
+	"folders": [
+		{
+			"path": "Firmware"
+		},
+		{
+			"path": "."
+		}
+	],
+    "settings": {
+        "files.associations": {
+            "cctype": "cpp",
+            "cmath": "cpp",
+            "cstdarg": "cpp",
+            "cstddef": "cpp",
+            "cstdio": "cpp",
+            "cstdlib": "cpp",
+            "type_traits": "cpp",
+            "limits": "cpp",
+            "*.tcc": "cpp",
+            "cinttypes": "cpp",
+            "cstdint": "cpp",
+            "typeinfo": "cpp"
+        }
+    }
 }
