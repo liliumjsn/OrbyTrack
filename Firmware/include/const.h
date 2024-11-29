@@ -8,7 +8,7 @@
 const int SCREEN_WIDTH = 128;  // OLED display width, in pixels
 const int SCREEN_HEIGHT = 64; // OLED display height, in pixels
 
-const float CHG_FLOATING_MAX = 2.7f;
+const float CHG_FLOATING_MAX = 3.1f;
 const float CHG_FLOATING_MIN = 0.5f;
 const float BATT_VOLT_INFLUENCE = 0.05f;
 const float BATT_PERC_INFLUENCE = 0.05f;
