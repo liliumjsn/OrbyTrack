@@ -39,6 +39,7 @@ bool is_time_to_sleep()
 
 uint32_t get_sec_until_sleep()
 {
+    if(get_power_state() != PowerState::DISCHARGING) return 0;
     return (Settings::get_shutdown_inactivity_minutes() * 60) - (millis() - _sleep_timer_last_ts_ms) / 1000;
 }
 
