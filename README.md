@@ -1,4 +1,4 @@
-# OrbyTrack  
+<img src="orbytrack_name_logo.png" height="120" />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)  
 [![3D Printable](https://img.shields.io/badge/3D%20Printable-Yes-blue.svg)](https://github.com/yourusername/OrbyTrack/tree/main/Case)  
