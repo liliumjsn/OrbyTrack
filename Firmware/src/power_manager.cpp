@@ -26,10 +26,10 @@ void reset_sleep_timer()
 bool is_time_to_sleep()
 {    
     if(get_power_state() != PowerState::DISCHARGING) return false;
-    // else if(get_batt_volt() < Settings::get_batt_cutoff() && millis() > 20000)
-    // {
-    //     return true;
-    // }
+    else if(get_batt_volt() < Settings::get_batt_cutoff() && millis() > 20000)
+    {
+        return true;
+    }
     else if(millis() - _sleep_timer_last_ts_ms > Settings::get_shutdown_inactivity_minutes() * 60 * 1000)
     {
         return true;
