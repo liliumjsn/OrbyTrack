@@ -42,6 +42,10 @@ float get_drops_per_hour();
 float get_ml_per_min(bool is_micro = false);
 float get_ml_per_hour(bool is_micro = false);
 void init();
+void enable();
+void disable();
+void handle();
+bool set_detection_cb(void (*detection_cb)(DetectedDroplet* latest_detected_droplet));
 
 }
 

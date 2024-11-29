@@ -4,6 +4,7 @@
 #include <RingBuf.h>
 #include "pinout.h"
 #include "common.h"
+#include "settings.h"
 
 #define USING_TIMER_TC3         true      // Only TC3 can be used for SAMD51
 #define USING_TIMER_TC4         false     // Not to use with Servo library
@@ -25,7 +26,7 @@ bool _is_enabled = false;
 
 void set_ir_led_state(bool state)
 {
-	digitalWrite(PIN_IR_LED, !state);
+	digitalWrite(PIN_IR_LED, state);
 }
 
 bool set_detection_cb(void (*detection_cb)(DetectedDroplet* latest_detected_droplet))
@@ -43,14 +44,15 @@ void pt_read_timer_isr()
 	switch(tick_counter)
 	{
 		case 0:
-			bg_val = analogReadFast(PIN_IR_PT);
+			
 			break;
 		case 1:
 			break;
 		case 2:
+            bg_val = analogReadFast(PIN_IR_PT);
+            set_ir_led_state(true);
 			break;
 		case 3:
-			set_ir_led_state(true);
 			break;
 		case 4:
 			uint16_t pt_val = bg_val - analogReadFast(PIN_IR_PT);
@@ -100,7 +102,8 @@ void disable()
 float get_drops_per_min()
 {
 	if(_latest_detected_droplet.period_ms == 0) return 0.0f;
-	if(_latest_detected_droplet.period_ms > 50) return 0.0f;
+	if(_latest_detected_droplet.period_ms > DROPLET_PERIOD_MAX_MS) return 0.0f;
+    if(millis() - _latest_detected_droplet.ts > DROPLET_PERIOD_MAX_MS) return 0.0f;
 
 	float freq = 1000.0f/(float)_latest_detected_droplet.period_ms;
 	return freq * 60.0f;
@@ -212,13 +215,18 @@ bool detect_droplet(uint16_t new_pt_sample, uint32_t ts, DetectedDroplet *drople
 void handle()
 {
 	uint16_t pt_val = 0;
-	if(_is_enabled && _pt_read_buff.lockedPop(pt_val))
+	while(_is_enabled && _pt_read_buff.lockedPop(pt_val))
 	{
-		if(DropletDetector::detect_droplet(pt_val, millis(), &_latest_detected_droplet, DROPLET_DETECTOR_THRESHOLD, DROPLET_DETECTOR_INFLUENCE))
+		if(DropletDetector::detect_droplet(pt_val, millis(), &_latest_detected_droplet, Settings::get_droplet_threshold_level(), Settings::get_droplet_influence_level()))
 		{
 			if(_detection_cb != NULL) _detection_cb(&_latest_detected_droplet);
+            break;
 		}
 	}
+    if(_pt_read_buff.isFull())
+    {
+        Serial.println("OF");
+    }
 }
 	
 }
