@@ -14,6 +14,13 @@ enum class PowerState
 	CHARGING_DONE
 };
 
+enum class SleepReason
+{
+    NONE = 0,
+    LOW_BAT,
+    INACTIVITY
+};
+
 void init();
 void handle();
 PowerState get_power_state();
@@ -23,7 +30,7 @@ void attach_wakeup_cb();
 bool is_charging();
 void sleep();
 void reset_sleep_timer();
-bool is_time_to_sleep();
+SleepReason is_time_to_sleep();
 uint32_t get_sec_until_sleep();
 float get_chg_volt();
 

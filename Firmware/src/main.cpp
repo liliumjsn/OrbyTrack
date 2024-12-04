@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "droplet_detector.h"
-#include "ui.h"
+#include "ui_common.h"
 #include "power_manager.h"
 #include "pinout.h"
 #include "settings.h"
@@ -17,17 +17,26 @@ void setup()
     DropletDetector::set_detection_cb([](DropletDetector::DetectedDroplet *latest_detected_droplet){
         PowerManager::reset_sleep_timer();
         Serial.println("DP");
+        UiStateMain::droplet_detected_handler();
     });
-    Ui::init();
+    UiCommon::init();
 }
 
 void loop()
 {
 	PowerManager::handle();
-    Ui::handle();
-    if(PowerManager::is_time_to_sleep())
+    UiCommon::handle();
+    PowerManager::SleepReason sleep_reason = PowerManager::is_time_to_sleep();
+    switch(sleep_reason)
     {
-        Ui::change_state(Ui::UiStateSleep::get_data());
+        case PowerManager::SleepReason::NONE:
+            break;
+        case PowerManager::SleepReason::LOW_BAT:
+            UiCommon::shutdown("LOW BATTERY");
+            break;
+       case PowerManager::SleepReason::INACTIVITY:
+            UiCommon::shutdown("INACTIVITY");
+            break;
     }
     DropletDetector::handle();
 }

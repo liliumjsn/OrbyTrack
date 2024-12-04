@@ -2,7 +2,6 @@
 #define SETTINGS_H
 
 #include "common.h"
-#include "ui.h"
 
 namespace Settings
 {

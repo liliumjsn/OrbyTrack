@@ -23,18 +23,18 @@ void reset_sleep_timer()
     _sleep_timer_last_ts_ms = millis();
 }
 
-bool is_time_to_sleep()
+SleepReason is_time_to_sleep()
 {    
-    if(get_power_state() != PowerState::DISCHARGING) return false;
+    if(get_power_state() != PowerState::DISCHARGING) return SleepReason::NONE;
     else if(get_batt_volt() < Settings::get_batt_cutoff() && millis() > 20000)
     {
-        return true;
+        return SleepReason::LOW_BAT;
     }
     else if(millis() - _sleep_timer_last_ts_ms > Settings::get_shutdown_inactivity_minutes() * 60 * 1000)
     {
-        return true;
+        return SleepReason::INACTIVITY;
     }
-    return false;
+    return SleepReason::NONE;
 }
 
 uint32_t get_sec_until_sleep()
