@@ -8,7 +8,8 @@ namespace UiStateMain
 	float _drip_rate = 0.0f;
 	bool _update_screen  = false;
 	uint32_t _last_draw_ts = 0;
-	uint32_t _droplet_draw_ts = 0;
+	uint32_t _droplet_indc_draw_ts = 0;
+	bool _droplet_indc_on = false;
 
 	void draw_battery_icon(uint8_t x, uint8_t y, uint8_t perc, bool is_charging)
 	{
@@ -58,15 +59,16 @@ namespace UiStateMain
 
 	void droplet_detected_handler()
 	{   
-		_droplet_draw_ts = millis();
+		_droplet_indc_draw_ts = millis();
 		_update_screen = true;
+		_droplet_indc_on = true;
 	}
 
 	void draw()
 	{
 		UiCommon::get_display()->clearDisplay();
 
-		if(millis() - _droplet_draw_ts <= DROPLEPT_INDICATOR_BLINK_DURATION_MS)
+		if(millis() - _droplet_indc_draw_ts <= DROPLEPT_INDICATOR_BLINK_DURATION_MS)
 		{
 			UiCommon::get_display()->drawBitmap(7, 53, epd_bitmap_droplet, 7, 11, 1);
 		}
@@ -167,9 +169,10 @@ namespace UiStateMain
 		}
 		interrupts();
 
-		if(millis() - _droplet_draw_ts > DROPLEPT_INDICATOR_BLINK_DURATION_MS)
+		if(millis() - _droplet_indc_draw_ts > DROPLEPT_INDICATOR_BLINK_DURATION_MS && _droplet_indc_on)
 		{
 			_last_draw_ts = 0;
+			_droplet_indc_on = false;
 		}
 
 		if(millis() - _last_draw_ts > DISPLAY_REF_PERIOD_MS)

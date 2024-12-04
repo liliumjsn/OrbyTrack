@@ -88,10 +88,10 @@ void init()
 
 void enable()
 {
-	_is_enabled = true;
-	_pt_read_timer.enableTimer();
+	_is_enabled = true;	
     detected_droplet_init(&_latest_detected_droplet);
     _latest_detected_droplet.period_ms = 0;
+    _pt_read_timer.enableTimer();
 }
 
 void disable()

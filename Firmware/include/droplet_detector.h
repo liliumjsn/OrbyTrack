@@ -6,15 +6,6 @@
 namespace DropletDetector
 {
 
-// Peak width max 70ms
-// Searching for 20ms zeros, 70ms peaks, 20ms zeros pattern
-
-const uint8_t DROPLET_EVAL_ZERO_SPAN_MIN = 40; // 20 ms @ 0.5ms sampling rate
-const uint8_t DROPLET_EVAL_NONZERO_SPAN_MAX = 80; // 40 ms @ 0.5ms sampling rate
-const uint8_t DROPLET_EVAL_NONZERO_SPAN_MIN = 10; // 7 ms @ 0.5ms sampling rate
-const uint8_t DROPLET_MACRO_PER_ML = 20;
-const uint8_t DROPLET_MICRO_PER_ML = 60;
-
 enum class DropletDetectionState
 {
 	NONE = 0,

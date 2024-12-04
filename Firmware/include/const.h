@@ -26,6 +26,15 @@ const uint16_t DISPLAY_REF_PERIOD_MS = 1000;
 
 const uint32_t STORAGE_MAGIC_BYTES_VALAUE = 0xA55B00B5;
 
-const uint16_t DROPLEPT_INDICATOR_BLINK_DURATION_MS = 200;
+const uint16_t DROPLEPT_INDICATOR_BLINK_DURATION_MS = 150;
+
+// Searching for pattern: 20ms zeros -> 5-40ms peaks -> 20ms zeros
+const uint8_t DROPLET_EVAL_ZERO_SPAN_MIN = 40; // 20 ms @ 0.5ms sampling rate
+const uint8_t DROPLET_EVAL_NONZERO_SPAN_MAX = 80; // 40 ms @ 0.5ms sampling rate
+const uint8_t DROPLET_EVAL_NONZERO_SPAN_MIN = 10; // 5 ms @ 0.5ms sampling rate
+const uint8_t DROPLET_MACRO_PER_ML = 20;
+const uint8_t DROPLET_MICRO_PER_ML = 60;
+
+const uint16_t MIN_BOOT_TIME_BEFORE_LOW_BATT_OFF_MS = 50000;
 
 #endif

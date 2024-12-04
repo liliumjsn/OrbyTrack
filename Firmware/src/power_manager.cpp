@@ -20,27 +20,27 @@ uint32_t _sleep_timer_last_ts_ms = 0;
 
 void reset_sleep_timer()
 {
-    _sleep_timer_last_ts_ms = millis();
+	_sleep_timer_last_ts_ms = millis();
 }
 
 SleepReason is_time_to_sleep()
-{    
-    if(get_power_state() != PowerState::DISCHARGING) return SleepReason::NONE;
-    else if(get_batt_volt() < Settings::get_batt_cutoff() && millis() > 20000)
-    {
-        return SleepReason::LOW_BAT;
-    }
-    else if(millis() - _sleep_timer_last_ts_ms > Settings::get_shutdown_inactivity_minutes() * 60 * 1000)
-    {
-        return SleepReason::INACTIVITY;
-    }
-    return SleepReason::NONE;
+{
+	if(get_power_state() != PowerState::DISCHARGING) return SleepReason::NONE;
+	else if(get_batt_volt() < Settings::get_batt_cutoff() && millis() > MIN_BOOT_TIME_BEFORE_LOW_BATT_OFF_MS)
+	{
+		return SleepReason::LOW_BAT;
+	}
+	else if(millis() - _sleep_timer_last_ts_ms > Settings::get_shutdown_inactivity_minutes() * 60 * 1000)
+	{
+		return SleepReason::INACTIVITY;
+	}
+	return SleepReason::NONE;
 }
 
 uint32_t get_sec_until_sleep()
 {
-    if(get_power_state() != PowerState::DISCHARGING) return 0;
-    return (Settings::get_shutdown_inactivity_minutes() * 60) - (millis() - _sleep_timer_last_ts_ms) / 1000;
+	if(get_power_state() != PowerState::DISCHARGING) return 0;
+	return (Settings::get_shutdown_inactivity_minutes() * 60) - (millis() - _sleep_timer_last_ts_ms) / 1000;
 }
 
 void set_oled_12v_en(bool enable)
@@ -52,7 +52,7 @@ void on_wakeup()
 {
 	if(!_was_sleeping) return;
 	_woken = true;
-    reset_sleep_timer();
+	reset_sleep_timer();
 	_was_sleeping = false;
 }
 
@@ -76,10 +76,10 @@ void sleep()
 
 void change_power_state(PowerState state)
 {
-    if(_cur_power_state == state) return;
+	if(_cur_power_state == state) return;
 
-    _cur_power_state = state;
-    reset_sleep_timer();
+	_cur_power_state = state;
+	reset_sleep_timer();
 }
 
 void calc_power_info()
@@ -103,11 +103,11 @@ void calc_power_info()
 	chg_volt *= 2;
 	chg_volt *= 3.3;
 	chg_volt /= 4095;
-    _chg_volt = chg_volt;
+	_chg_volt = chg_volt;
 
 	if(chg_volt > CHG_FLOATING_MAX)
 	{
-        change_power_state(PowerState::CHARGING_DONE);
+		change_power_state(PowerState::CHARGING_DONE);
 	}
 	else if(chg_volt > CHG_FLOATING_MIN)change_power_state(PowerState::DISCHARGING); // floating
 	else change_power_state(PowerState::CHARGING);
