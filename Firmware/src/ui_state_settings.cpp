@@ -298,6 +298,7 @@ namespace UiStateSettings
 		UiCommon::attach_btn_up_click(btn_up_click);
 		UiCommon::attach_btn_ok_lpress(btn_ok_long_press);
 		_page_index = 1;
+		_selector_index = 0;
 		for(int i = 0; i < ITEMS_COUNT; i++)
 		{
 			_items[i].on_load(&_items[i]);

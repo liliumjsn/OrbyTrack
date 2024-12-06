@@ -65,6 +65,9 @@ RetRes load()
 	setting_contrast_level.read(current_settings.contrast_level);
 	setting_droplet_threshold.read(current_settings.droplet_threshold);
 	setting_droplet_influence.read(current_settings.droplet_influence);
+    setting_droplet_gap_min.read(current_settings.droplet_gap_min);
+    setting_droplet_span_max.read(current_settings.droplet_span_max);
+    setting_droplet_span_min.read(current_settings.droplet_span_min);
 
 	uint32_t magic_bytes_read;
 	magic_bytes.read(magic_bytes_read);
@@ -86,6 +89,9 @@ RetRes save()
 	setting_contrast_level.write(current_settings.contrast_level);
 	setting_droplet_threshold.write(current_settings.droplet_threshold);
 	setting_droplet_influence.write(current_settings.droplet_influence);
+    setting_droplet_gap_min.write(current_settings.droplet_gap_min);
+    setting_droplet_span_max.write(current_settings.droplet_span_max);
+    setting_droplet_span_min.write(current_settings.droplet_span_min);
 
 	uint32_t tmp = STORAGE_MAGIC_BYTES_VALAUE;
 	magic_bytes.write(tmp);

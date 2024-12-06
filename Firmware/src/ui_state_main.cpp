@@ -3,8 +3,7 @@
 namespace UiStateMain
 {
 	UiCommon::UiStateData _data = {.on_enter = on_enter, .tick = tick, .on_exit = on_exit};
-
-	Settings::MeasuringType _measuring_type = Settings::MeasuringType::NONE;
+	Settings::MeasuringType _next_measuring_type = Settings::MeasuringType::NONE;
 	float _drip_rate = 0.0f;
 	bool _update_screen  = false;
 	uint32_t _last_draw_ts = 0;
@@ -73,11 +72,11 @@ namespace UiStateMain
 			UiCommon::get_display()->drawBitmap(7, 53, epd_bitmap_droplet, 7, 11, 1);
 		}
 
-		draw_measuring_selector(_measuring_type);
+		draw_measuring_selector(Settings::get_measuring_type());
 		draw_battery_icon(90, 0, (uint8_t) PowerManager::get_batt_perc(), PowerManager::is_charging());
 		
 		UiCommon::get_display()->setTextSize(4);
-		switch(_measuring_type)
+		switch(Settings::get_measuring_type())
 		{
 			case Settings::MeasuringType::GTT:
 				_drip_rate = DropletDetector::get_drops_per_min();
@@ -108,7 +107,7 @@ namespace UiStateMain
 		}	
 
 		UiCommon::get_display()->setTextSize(1);	
-		if(_measuring_type == Settings::MeasuringType::GTT)
+		if(Settings::get_measuring_type() == Settings::MeasuringType::GTT)
 		{
 			UiCommon::get_display()->setCursor(39, 50);
 			UiCommon::get_display()->print("drops/min");
@@ -123,13 +122,10 @@ namespace UiStateMain
 
 	void btn_up_click()
 	{
-		if(_measuring_type == Settings::MeasuringType::MACRO) _measuring_type = Settings::MeasuringType::MICRO;
-		else if(_measuring_type == Settings::MeasuringType::MICRO) _measuring_type = Settings::MeasuringType::GTT;
-		else if(_measuring_type == Settings::MeasuringType::GTT) _measuring_type = Settings::MeasuringType::MACRO;
+		if(Settings::get_measuring_type() == Settings::MeasuringType::MACRO) _next_measuring_type = Settings::MeasuringType::MICRO;
+		else if(Settings::get_measuring_type() == Settings::MeasuringType::MICRO) _next_measuring_type = Settings::MeasuringType::GTT;
+		else if(Settings::get_measuring_type() == Settings::MeasuringType::GTT) _next_measuring_type = Settings::MeasuringType::MACRO;
 		else return;
-		_update_screen = true;
-		Settings::set_measuring_type(_measuring_type);
-		Settings::save();
 	}
 
 	void btn_ok_click()
@@ -154,20 +150,29 @@ namespace UiStateMain
 		UiCommon::attach_btn_up_click(btn_up_click);
 		UiCommon::attach_btn_dn_click(btn_dn_click);
 		UiCommon::attach_btn_ok_lpress(btn_ok_long_press);
-		_measuring_type = Settings::get_measuring_type();
+		_next_measuring_type = Settings::get_measuring_type();
 		DropletDetector::enable();
 		draw();
 	}	
 
 	void tick()
 	{
+		if(_next_measuring_type != Settings::get_measuring_type())
+		{
+			Settings::set_measuring_type(_next_measuring_type);
+			DropletDetector::disable();
+			Settings::save();
+			DropletDetector::enable();
+			_update_screen = true;
+		}
+
 		noInterrupts();
 		if(_update_screen)
 		{
 			_last_draw_ts = 0;
 			_update_screen = false;
 		}
-		interrupts();
+		interrupts();        
 
 		if(millis() - _droplet_indc_draw_ts > DROPLEPT_INDICATOR_BLINK_DURATION_MS && _droplet_indc_on)
 		{

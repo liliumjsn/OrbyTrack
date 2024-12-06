@@ -22,7 +22,6 @@ struct DetectedDroplet
 	uint8_t highs = 0;
 	uint8_t lows = 0;
 	uint8_t span = 0;
-	uint32_t drop_index = 0;
 	uint32_t ts = 0;
 	uint32_t period_ms = 0;
     DropletDetectionState detection_state = DropletDetectionState::NONE;
