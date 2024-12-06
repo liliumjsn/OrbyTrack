@@ -28,8 +28,7 @@ void init()
 	if(load() != RetRes::OK)
 	{
 		Serial.println("Settings load failed or first run");
-		memcpy(&current_settings, &default_settings, sizeof(Data));
-		save();
+		reset();
 	}
 }
 
@@ -79,6 +78,12 @@ RetRes load()
 	if(magic_bytes_read != STORAGE_MAGIC_BYTES_VALAUE) return RetRes::ERROR;
 
 	return RetRes::OK;
+}
+
+RetRes reset()
+{
+    memcpy(&current_settings, &default_settings, sizeof(Data));
+	return save();
 }
 
 RetRes save()

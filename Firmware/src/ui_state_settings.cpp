@@ -8,6 +8,7 @@ namespace UiStateSettings
 	uint8_t _selector_index = 0;
 	uint8_t _page_index = 0;
 	bool _is_item_selected = false;
+	bool _on_item_select_event = false;
 
 	UiCommon::BlinkItem setting_title = 
 	{
@@ -25,8 +26,7 @@ namespace UiStateSettings
 
 	struct SettingsItem
 	{
-		uint8_t index = 0;
-		uint8_t page = 0;
+		bool is_action = false;
 		float offset;
 		float min;
 		float max;
@@ -36,6 +36,7 @@ namespace UiStateSettings
 		void (*on_save)(SettingsItem* item) = NULL;
 		const char* name = NULL;
 		const char* units = "";
+		void (*on_select)(SettingsItem* item) = NULL;
 	};
 
 	SettingsItem _items[] = 
@@ -140,6 +141,16 @@ namespace UiStateSettings
 			.on_save = [](SettingsItem* item){Settings::set_droplet_gap_min((uint16_t) item->val);},
 			.name = "DROP_GAP_MIN",
 			.units = "ms"
+		},
+		{
+			.is_action = true,
+			.on_save = [](SettingsItem* item){item->name = "<RESET_SETTINGS>";},
+			.name = "<RESET_SETTINGS>",
+			.on_select = [](SettingsItem* item){
+				Settings::reset();
+				item->name = "DONE";
+			},
+			
 		}
 	};
 
@@ -156,6 +167,14 @@ namespace UiStateSettings
 		uint8_t page_items_count = SETTINGS_ITEMS_PER_PAGE;
 		if(_page_index == PAGE_COUNT) page_items_count = ITEMS_COUNT - (_page_index - 1) * SETTINGS_ITEMS_PER_PAGE;
 		return page_items_count;
+	}
+
+	void items_load_all()
+	{
+		for(int i = 0; i < ITEMS_COUNT; i++)
+		{
+			if(_items[i].on_load != NULL)_items[i].on_load(&_items[i]);
+		}
 	}
 
 	void draw_selector()
@@ -204,15 +223,28 @@ namespace UiStateSettings
 		draw_selector();
 		draw_sidebar();
 
+		if(_on_item_select_event)
+		{
+			if(_items[item_idx(_selector_index)].on_select != NULL)
+			{
+				_items[item_idx(_selector_index)].on_select(&_items[item_idx(_selector_index)]);
+				items_load_all();
+			}			
+			_on_item_select_event = false;
+		}
+
 		for(int i = 0; i < items_in_page(); i++)
 		{
 			UiCommon::get_display()->setCursor(6, (i + 1) * 10 + 2);
 			bool blink = _is_item_selected && _selector_index == i;
 			UiCommon::process_blink_item(&setting_title, blink, _items[item_idx(i)].name, &_update_screen);
 			UiCommon::get_display()->setTextColor(SH110X_WHITE);
-			UiCommon::get_display()->print(":");
-			UiCommon::get_display()->print(_items[item_idx(i)].val, _items[item_idx(i)].decimals);
-			UiCommon::get_display()->print(_items[item_idx(i)].units);	
+			if(!_items[item_idx(i)].is_action)
+			{
+				UiCommon::get_display()->print(":");
+				UiCommon::get_display()->print(_items[item_idx(i)].val, _items[item_idx(i)].decimals);
+				UiCommon::get_display()->print(_items[item_idx(i)].units);
+			}
 		}
 
 		UiCommon::get_display()->display();
@@ -282,10 +314,14 @@ namespace UiStateSettings
 		if(!_is_item_selected)
 		{
 			_is_item_selected = true;
+			_on_item_select_event = true;
 		}
 		else
 		{
-			_items[item_idx(_selector_index)].on_save(&_items[item_idx(_selector_index)]);
+			if(_items[item_idx(_selector_index)].on_save != NULL)
+			{
+				_items[item_idx(_selector_index)].on_save(&_items[item_idx(_selector_index)]);
+			}			
 			Settings::save();
 			_is_item_selected = false;
 		}
@@ -300,10 +336,7 @@ namespace UiStateSettings
 		UiCommon::attach_btn_ok_lpress(btn_ok_long_press);
 		_page_index = 1;
 		_selector_index = 0;
-		for(int i = 0; i < ITEMS_COUNT; i++)
-		{
-			_items[i].on_load(&_items[i]);
-		}
+		items_load_all();
 		draw();
 	}
 

@@ -43,6 +43,7 @@ const Data default_settings =
 void init();
 RetRes load();
 RetRes save();
+RetRes reset();
 
 uint16_t get_shutdown_inactivity_minutes();
 void set_shutdown_inactivity_minutes(uint16_t val);
