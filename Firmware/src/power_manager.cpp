@@ -112,7 +112,7 @@ void calc_power_info()
 	else if(chg_volt > CHG_FLOATING_MIN)change_power_state(PowerState::DISCHARGING); // floating
 	else change_power_state(PowerState::CHARGING);
 
-	float new_batt_perc = 123.0f - 123.0f/pow(1.0f + pow(_batt_volt/3.7f, 80.0f), 0.165f);
+	float new_batt_perc = 123.0f - 123.0f/pow(1.0f + pow((_batt_volt + 0.04)/3.7f, 80.0f), 0.165f);
 	if(_batt_perc < 0)
 	{
 		_batt_perc = new_batt_perc;
@@ -130,8 +130,10 @@ void calc_power_info()
 		}
 		else if(_cur_power_state == PowerState::CHARGING)
 		{
-			if(filtered_batt_perc > _batt_perc) _batt_perc = filtered_batt_perc;
+			if(filtered_batt_perc > _batt_perc) _batt_perc = filtered_batt_perc;            
 		}
+        if(_batt_perc > 100) _batt_perc = 100;
+        else if(_batt_perc < 1) _batt_perc = 1;
 	}
 }
 
