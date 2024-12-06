@@ -76,9 +76,9 @@ namespace UiStateSettings
 			.name = "SCREEN_CONT"
 		},
 		{
-			.offset = 1.0f,
+			.offset = 10.0f,
 			.min = 50.0f,
-			.max = 500.0f,			
+			.max = 900.0f,			
 			.val = (float) Settings::default_settings.droplet_threshold,
 			.decimals = 0,
 			.on_load = [](SettingsItem* item){item->val = Settings::get_droplet_threshold_level();},
@@ -87,13 +87,14 @@ namespace UiStateSettings
 		},
 		{
 			.offset = 5.0f,
-			.min = 0.0f,
+			.min = 5.0f,
 			.max = 100.0f,			
 			.val = (float) Settings::default_settings.droplet_influence,
 			.decimals = 0,
 			.on_load = [](SettingsItem* item){item->val = Settings::get_droplet_influence_level();},
 			.on_save = [](SettingsItem* item){Settings::set_droplet_influence_level((uint16_t) item->val);},
-			.name = "DROP_INFL"
+			.name = "DROP_INFL",
+			.units = "%"
 		},
 		{
 			.offset = 1.0f,
@@ -181,8 +182,8 @@ namespace UiStateSettings
 		uint8_t bar_y1 = (_page_index - 1) * (bar_bg_delta / PAGE_COUNT) + bar_bg_y1;
 		uint8_t bar_y2 = (_page_index) * (bar_bg_delta / PAGE_COUNT) + bar_bg_y1;
 
-		if(_page_index == 1) bar_y1 = bar_bg_y1;
-		if(_page_index == PAGE_COUNT) bar_y2 = bar_bg_y2;
+		if(_page_index == 1) bar_y1 = bar_bg_y1 + 4;
+		if(_page_index == PAGE_COUNT) bar_y2 = bar_bg_y2 - 4;
 
 		UiCommon::get_display()->drawLine(x_off - 1, bar_y1, x_off - 1, bar_y2, 1);
 		UiCommon::get_display()->drawLine(x_off - 2, bar_y1, x_off - 2, bar_y2, 1);
