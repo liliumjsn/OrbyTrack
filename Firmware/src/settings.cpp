@@ -16,6 +16,9 @@ FlashStorage(setting_batt_cutoff, float);
 FlashStorage(setting_contrast_level, uint8_t);
 FlashStorage(setting_droplet_threshold, uint16_t);
 FlashStorage(setting_droplet_influence, uint16_t);
+FlashStorage(setting_droplet_span_min, uint16_t);
+FlashStorage(setting_droplet_span_max, uint16_t);
+FlashStorage(setting_droplet_gap_min, uint16_t);
 FlashStorage(magic_bytes, uint32_t);
 
 Data current_settings = {};
@@ -45,6 +48,12 @@ void print_current_settings()
 	Serial.println(current_settings.droplet_threshold);
 	Serial.print("setting_droplet_influence: ");
 	Serial.println(current_settings.droplet_influence);
+    Serial.print("setting_droplet_span_min: ");
+	Serial.println(current_settings.droplet_span_min);
+    Serial.print("setting_droplet_span_max: ");
+	Serial.println(current_settings.droplet_span_max);
+    Serial.print("setting_droplet_gap_min: ");
+	Serial.println(current_settings.droplet_gap_min);
 	Serial.println("==========================================");
 }
 
@@ -150,6 +159,36 @@ uint16_t get_droplet_influence_level()
 void set_droplet_influence_level(uint16_t val)
 {
 	current_settings.droplet_influence = val;
+}
+
+uint16_t get_droplet_span_min()
+{
+    return current_settings.droplet_span_min;
+}
+
+void set_droplet_span_min(uint16_t val)
+{
+    current_settings.droplet_span_min = val;
+}
+
+uint16_t get_droplet_span_max()
+{
+    return current_settings.droplet_span_max;
+}
+
+void set_droplet_span_max(uint16_t val)
+{
+    current_settings.droplet_span_max = val;
+}
+
+uint16_t get_droplet_gap_min()
+{
+    return current_settings.droplet_gap_min;
+}
+
+void set_droplet_gap_min(uint16_t val)
+{
+    current_settings.droplet_gap_min = val;
 }
 
 }

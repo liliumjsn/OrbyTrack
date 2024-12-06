@@ -155,7 +155,7 @@ bool detect_droplet(uint16_t new_pt_sample, uint32_t ts, DetectedDroplet *drople
 			}
 			else
 			{
-				if(detecting_droplet.leading_zeros >= DROPLET_EVAL_ZERO_SPAN_MIN)
+				if(detecting_droplet.leading_zeros >= Settings::get_droplet_gap_min())
 				{
 					detecting_droplet.detection_state = DropletDetectionState::NON_ZEROS;
 					// Serial.println("St:NZ");
@@ -184,11 +184,11 @@ bool detect_droplet(uint16_t new_pt_sample, uint32_t ts, DetectedDroplet *drople
 			{
 				detecting_droplet.trailing_zeros++;
 			}
-			if(detecting_droplet.trailing_zeros < DROPLET_EVAL_ZERO_SPAN_MIN) break;
+			if(detecting_droplet.trailing_zeros < Settings::get_droplet_gap_min()) break;
 			else detecting_droplet.detection_state = DropletDetectionState::TRAILING_ZEROS;
 		case DropletDetectionState::TRAILING_ZEROS:
 			detecting_droplet.span -= detecting_droplet.trailing_zeros;
-			if(detecting_droplet.span > DROPLET_EVAL_NONZERO_SPAN_MIN && detecting_droplet.span < DROPLET_EVAL_NONZERO_SPAN_MAX)
+			if(detecting_droplet.span > Settings::get_droplet_span_min() && detecting_droplet.span < Settings::get_droplet_span_max())
 			{
 				detecting_droplet.detection_state = DropletDetectionState::DETECTED;
 			}

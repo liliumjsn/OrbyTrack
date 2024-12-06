@@ -22,6 +22,9 @@ struct Data
 	uint8_t contrast_level;
 	uint16_t droplet_threshold;
 	uint16_t droplet_influence;
+    uint16_t droplet_span_min;
+    uint16_t droplet_span_max;
+    uint16_t droplet_gap_min;
 };
 
 const Data default_settings = 
@@ -31,7 +34,10 @@ const Data default_settings =
 	.batt_cutoff = 3.5f,
 	.contrast_level = 5,
 	.droplet_threshold = 300,
-	.droplet_influence = 10
+	.droplet_influence = 10,
+    .droplet_span_min = 5,
+    .droplet_span_max= 40,	
+    .droplet_gap_min = 20
 };
 
 void init();
@@ -55,6 +61,15 @@ void set_droplet_threshold_level(uint16_t val);
 
 uint16_t get_droplet_influence_level();
 void set_droplet_influence_level(uint16_t val);
+
+uint16_t get_droplet_span_min();
+void set_droplet_span_min(uint16_t val);
+
+uint16_t get_droplet_span_max();
+void set_droplet_span_max(uint16_t val);
+
+uint16_t get_droplet_gap_min();
+void set_droplet_gap_min(uint16_t val);
 
 }
 

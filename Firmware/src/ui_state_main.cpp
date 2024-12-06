@@ -116,7 +116,7 @@ namespace UiStateMain
 		else
 		{
 			UiCommon::get_display()->setCursor(47, 50);
-			UiCommon::get_display()->print("ml/min");
+			UiCommon::get_display()->print("mL/min");
 		}
 		UiCommon::get_display()->display();
 	}
@@ -139,7 +139,7 @@ namespace UiStateMain
 
 	void btn_ok_long_press()
 	{
-		UiCommon::shutdown("USER ACTION");
+		UiCommon::shutdown();
 	}
 
 	void btn_dn_click()
