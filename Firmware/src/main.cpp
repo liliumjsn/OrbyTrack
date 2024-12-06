@@ -9,6 +9,7 @@ void setup()
 {
 	Serial.begin(115200);
     delay(5000); // Making sure it doesn't get stuck in sleep without USB
+    Serial.print("OrbyTrack ");
     Serial.print(ORBYTRACK_APP_VERSION);
     Serial.println(" by LiliumJSN");
     Settings::init();

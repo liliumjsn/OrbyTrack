@@ -43,8 +43,7 @@ void pt_read_timer_isr()
 {
 	switch(_tick_counter)
 	{
-		case 0:
-			
+		case 0:			
 			break;
 		case 1:
 			break;
@@ -161,7 +160,6 @@ bool detect_droplet(uint16_t new_pt_sample, uint16_t threshold, uint16_t influen
 				if(_cur_detected_droplet.leading_zeros >= droplet_ms_to_sample_count(Settings::get_droplet_gap_min()))
 				{
 					_cur_detected_droplet.detection_state = DropletDetectionState::NON_ZEROS;
-					// Serial.println("St:NZ");
 				}
 				else
 				{

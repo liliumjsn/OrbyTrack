@@ -88,7 +88,7 @@ void calc_power_info()
 	noInterrupts();
 	float new_batt_volt = analogReadFast(PIN_BAT_LVL);
 	interrupts();
-	new_batt_volt *= 2.00755f; // fine tune based on crappy 100K/100K divider on PIN9
+	new_batt_volt *= 2.00755f; // per device fine tune based on crappy 100K/100K divider on PIN9
 	new_batt_volt *= 3.300f;
 	new_batt_volt /= 4095;
 	// apply influence filter to minimize flickering
