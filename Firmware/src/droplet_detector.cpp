@@ -142,11 +142,11 @@ bool detect_droplet(uint16_t new_pt_sample, uint16_t threshold, uint16_t influen
 	static uint16_t last_filtered_pt = 0;
 
 	int peak_value = 0;
-	uint16_t filtered_pt = (last_filtered_pt * (100 - influence) + new_pt_sample * influence) / 100;
-	last_filtered_pt = filtered_pt;
-	if(new_pt_sample > filtered_pt + threshold) peak_value = 1;
-	else if(new_pt_sample < filtered_pt - threshold) peak_value = -1;
+	
+	if(new_pt_sample > last_filtered_pt + threshold) peak_value = 1;
+	else if(new_pt_sample < last_filtered_pt - threshold) peak_value = -1;
 	else peak_value = 0;
+    last_filtered_pt = (last_filtered_pt * (100 - influence) + new_pt_sample * influence) / 100;
 
 	switch(_cur_detected_droplet.detection_state)
 	{
