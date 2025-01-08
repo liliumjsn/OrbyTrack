@@ -22,7 +22,7 @@
 OrbyTrack/  
 │  
 ├── Firmware/     # Codebase for Adafruit Feather M0  
-├── Case/         # 3D design files for the casing  
+├── Design/       # 3D design files for the casing  
 ├── Assembly/     # Step-by-step assembly instructions  
 └── Usage/        # User guide, calibration, and troubleshooting 
 ```
