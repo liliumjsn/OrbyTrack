@@ -10,5 +10,8 @@ Electronics
 - 1x Adafruit Feather M0/Adalogger
 - 1x PT19-21B IR transistor 0603 package (https://www.aliexpress.com/item/1005005316682998.html)
 - 1x 940NM (18-20mW) SMD IR LED 1.3-1.5v 20mA 0603 package (https://www.aliexpress.com/item/1005007587334171.html)
-- 2x IR Filter Diskm, diameter 10mm, thickness 2mm
 - 1x Lithium Battery, Length 48mm, Thickness 4mm, Width 20mm, 500mAh
+
+Mechanical
+- 2x IR Filter Disk, diameter 10mm, thickness 2mm
+- 4x Screws, M1.7, 5mm 
