@@ -1,9 +1,5 @@
 <p align="center">
-    <img src="orbytrack_name_logo.png" style="width:auto;height:auto;max-height:120px;" />
-</p>
-<p align="center">
 <img src="Design\Icons\YT_Thumbnail.png" style="width:auto;height:auto;max-height:250px;" />
-<img src="Design\Photos\_JSN9351.jpg" style="width:auto;height:auto;max-height:250px;" />
 </p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)  
