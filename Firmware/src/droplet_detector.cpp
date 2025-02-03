@@ -32,6 +32,11 @@ void set_ir_led_state(bool state)
 	digitalWrite(PIN_IR_LED, state);
 }
 
+void set_ir_pt_state(bool state)
+{
+	digitalWrite(PIN_IR_PT_EN, state);
+}
+
 bool set_detection_cb(void (*detection_cb)(DetectedDroplet* latest_detected_droplet))
 {
 	if(_detection_cb == NULL) _detection_cb = detection_cb;
@@ -95,6 +100,7 @@ void enable()
     _bg_val = 0;
     _tick_counter = 0;
     _pt_read_timer.enableTimer();
+	set_ir_pt_state(true);
 }
 
 void disable()
@@ -102,6 +108,7 @@ void disable()
 	_is_enabled = false;
 	_pt_read_timer.disableTimer();
 	set_ir_led_state(false);
+	set_ir_pt_state(false);
 }
 
 float get_drops_per_min()

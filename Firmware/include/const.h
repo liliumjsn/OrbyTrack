@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define ORBYTRACK_APP_VERSION "v1.0"
+#define ORBYTRACK_APP_VERSION "v2.0"
 
 const int SCREEN_WIDTH = 128;  // OLED display width, in pixels
 const int SCREEN_HEIGHT = 64; // OLED display height, in pixels
@@ -16,7 +16,7 @@ const float BATT_PERC_INFLUENCE = 0.05f;
 const size_t PT_READ_BUFF_SIZE = 150;
 const uint16_t PT_TIMER_INTERVAL_US = 100;
 const uint16_t PT_SAMPLING_INTERVAL_US = 500;
-const uint16_t DROPLET_PERIOD_MAX_MS = 50000;
+const uint16_t DROPLET_PERIOD_MAX_MS = 120000;
 
 const uint16_t BOOT_LOGO_DURATION_MS = 7000;
 const uint16_t WAKEUP_LOGO_DURATION_MS = 4000;

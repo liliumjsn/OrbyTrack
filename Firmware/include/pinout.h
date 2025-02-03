@@ -4,6 +4,7 @@
 #include "common.h"
 
 const int PIN_IR_PT = PIN_A2;
+const int PIN_IR_PT_EN = 10;
 const int PIN_IR_LED = 12;
 const int PIN_CHG = PIN_A1;
 const int PIN_USB = 13;
