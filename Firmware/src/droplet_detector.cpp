@@ -115,8 +115,8 @@ void disable()
 float get_drops_per_min()
 {
 	if(_latest_detected_droplet.period_ms == 0) return 0.0f;
-	if(_latest_detected_droplet.period_ms > DROPLET_PERIOD_MAX_MS) return 0.0f;
-    if(millis() - _latest_detected_droplet.ts > DROPLET_PERIOD_MAX_MS) return 0.0f;
+	if(_latest_detected_droplet.period_ms / 1000 > DROPLET_PERIOD_MAX_SEC) return 0.0f;
+    if((millis() - _latest_detected_droplet.ts) / 1000 > DROPLET_PERIOD_MAX_SEC) return 0.0f;
 
 	float freq = 1000.0f/(float)_latest_detected_droplet.period_ms;
 	return freq * 60.0f;
