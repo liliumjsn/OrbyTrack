@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define ORBYTRACK_APP_VERSION "v2.0"
+#define ORBYTRACK_APP_VERSION "v2.1"
 
 const int SCREEN_WIDTH = 128;  // OLED display width, in pixels
 const int SCREEN_HEIGHT = 64; // OLED display height, in pixels

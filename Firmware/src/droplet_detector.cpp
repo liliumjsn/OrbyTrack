@@ -60,7 +60,8 @@ void pt_read_timer_isr()
 			break;
 		case 4:
 			uint16_t pt_val = _bg_val - analogReadFast(PIN_IR_PT);
-			if(_is_enabled) _pt_read_buff.push(&pt_val);
+			uint16_t pt_perc = pt_val * 100 / _bg_val;
+			if(_is_enabled) _pt_read_buff.push(&pt_perc);
 			set_ir_led_state(false);
 			break;
 	}

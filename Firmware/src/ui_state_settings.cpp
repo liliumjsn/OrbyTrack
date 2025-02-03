@@ -77,17 +77,18 @@ namespace UiStateSettings
 			.name = "SCREEN_CONT"
 		},
 		{
-			.offset = 10.0f,
-			.min = 50.0f,
-			.max = 900.0f,			
+			.offset = 1.0f,
+			.min = 1.0f,
+			.max = 100.0f,			
 			.val = (float) Settings::default_settings.droplet_threshold,
 			.decimals = 0,
 			.on_load = [](SettingsItem* item){item->val = Settings::get_droplet_threshold_level();},
 			.on_save = [](SettingsItem* item){Settings::set_droplet_threshold_level((uint16_t) item->val);},
-			.name = "DROP_THLD"
+			.name = "DROP_THLD",
+			.units = "%"
 		},
 		{
-			.offset = 5.0f,
+			.offset = 1.0f,
 			.min = 5.0f,
 			.max = 100.0f,			
 			.val = (float) Settings::default_settings.droplet_influence,
