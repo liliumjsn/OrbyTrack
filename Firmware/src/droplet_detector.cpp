@@ -24,7 +24,7 @@ RingBuf<uint16_t, PT_READ_BUFF_SIZE> _pt_read_buff;
 SAMDTimer _pt_read_timer(TIMER_TC3);
 void (*_detection_cb)(DetectedDroplet* latest_detected_droplet) = NULL;
 bool _is_enabled = false;
-uint16_t _bg_val = 0;
+uint32_t _bg_val = 0;
 uint8_t _tick_counter = 0;
 
 void set_ir_led_state(bool state)
@@ -46,28 +46,46 @@ bool set_detection_cb(void (*detection_cb)(DetectedDroplet* latest_detected_drop
 
 void pt_read_timer_isr()
 {
-	switch(_tick_counter)
+	static uint32_t pt_val = 0;
+
+	if(_tick_counter < 5)
 	{
-		case 0:			
-			break;
-		case 1:
-			break;
-		case 2:
-            _bg_val = analogReadFast(PIN_IR_PT);
-            set_ir_led_state(true);
-			break;
-		case 3:
-			break;
-		case 4:
-			uint16_t pt_val = _bg_val - analogReadFast(PIN_IR_PT);
+		if(_tick_counter == 0)
+		{
+			_bg_val = 0;
+		}
+		_bg_val += analogReadFast(PIN_IR_PT);
+		if(_tick_counter == 4)
+		{
+			set_ir_led_state(true);
+		}
+	}
+	else if(_tick_counter < 10)
+	{
+		if(_tick_counter == 5)
+		{
+			pt_val = 0;			
+		}
+
+		pt_val += analogReadFast(PIN_IR_PT);
+
+		if(_tick_counter == 9)
+		{
+			pt_val /= 5;
+			_bg_val /= 5;
+			pt_val = _bg_val - pt_val;
 			uint16_t pt_perc = pt_val * 100 / _bg_val;
-			if(_is_enabled) _pt_read_buff.push(&pt_perc);
+			if(_is_enabled)
+			{
+				_pt_read_buff.push(&pt_perc);
+			}
 			set_ir_led_state(false);
-			break;
+		}
 	}
 	
-	_tick_counter++;
-	if(_tick_counter > 4) _tick_counter = 0;
+	if(_tick_counter < 9) _tick_counter++;
+	else _tick_counter = 0;
+	
 }
 
 void detected_droplet_init(DetectedDroplet *droplet)
